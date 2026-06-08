@@ -13,6 +13,32 @@ int n;
 int arr[11];
 int add_cnt,sub_cnt,mul_cnt;
 
+void solve(int k, int tot){
+    if(k == n){
+        mx = max(mx,tot);
+        mn = min(mn,tot);
+        return;
+    }
+
+    if(add_cnt > 0){
+        add_cnt --;
+        solve(k+1,tot+arr[k]);
+        add_cnt++;
+    } 
+    if(sub_cnt > 0){
+        sub_cnt --;
+        solve(k+1,tot-arr[k]);
+        sub_cnt++;
+    }     
+    if(mul_cnt > 0){
+        mul_cnt --;
+        solve(k+1,tot*arr[k]);
+        mul_cnt++;
+    } 
+    
+}
+
+
 int main(void){
     cin.tie(0);
     ios::sync_with_stdio(0);
@@ -22,42 +48,7 @@ int main(void){
     for(int i = 0 ; i < n ; i ++ ) cin >> arr[i];
     cin >> add_cnt >> sub_cnt >> mul_cnt;
 
+    solve(1,arr[0]);
 
-    // for(int i = 0 ; i < n ; i ++ ) cout << arr[i] << ' ';
-    // cout << '\n';
-    // cout << add_cnt << sub_cnt << muL_cnt << '\n';
-
-    vector<int> sel;
-    for(int i = 0 ; i < add_cnt; i++) sel.push_back(1);
-    for(int i = 0 ; i < sub_cnt; i++) sel.push_back(2);
-    for(int i = 0 ; i < mul_cnt; i++) sel.push_back(3);
-
-    int sz = (int)sel.size();
-
-    do{
-        int tmp = arr[0] ;
-        for(int i = 0 ; i < sz;i ++){
-            if(sel[i] == 1)  {
-                tmp += arr[i+1];
-            } else if(sel[i] == 2){
-                tmp -=  arr[i+1];
-            } else if(sel[i] == 3){
-                tmp *=  arr[i+1];
-                
-            }
-
-            // cout << sel[i];
-        }
-        // cout << '\n';
-
-        mn = min(tmp,mn);
-        mx = max(tmp,mx);
-        // cout << mn << ' ' << mx << '\n';
-
-    } while(next_permutation(sel.begin(),sel.end()));
-    // for(auto s : sel ) cout << s << ' ';
-
-    
-    
     cout << mn << ' ' << mx;
 }
