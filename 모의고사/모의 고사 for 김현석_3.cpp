@@ -28,15 +28,57 @@
         weights 배열의 원소는 1 이상 100,000 이하인 자연수입니다.
 
     
+    0. 최대 100'000 * 100'000 이므로 long long
+    1. map 에는 오름차순으로 정렬된다.
+        원소의 사용 개수를 넣는다
+
+    2. 해당 무게의 사용 개수들을 내림차순한다. == 이유는 가장 최댓값을 구하기 위해
+
+    3. 해당 무게의 사용 개수들을 두 개씩 짝지어서, 2 * 해당 무게을 map에 추가한다.
+
 */
 #include<bits/stdc++.h>
 using namespace std;
 
 
+int n;
+int weights[100'010];
+map<long long, vector<int>> mp;
+int ans;
+
+void solve(){
+    cin >> n;
+    for(int i = 0 ; i < n ; i ++ ) cin >> weights[i];
+    for(int i = 0 ; i < n ; i ++ ) mp[weights[i]].push_back(1);
+    
+
+    for(auto it = mp.begin(); it != mp.end(); it++){
+        long long cur_W = it->first;
+        vector<int> counts = it-> second;
+
+        sort(counts.begin(),counts.end(),greater<int>());
+        
+        ans = max(ans,counts[0]);
+        
+        // 무게 2의 {2 2 2 2, 1,1 }-> 무게 4 {4, 4, 2}
+        for(int i = 0 ; i + 1 < counts.size(); i+=2)
+            mp[2*cur_W].push_back(counts[i] + counts[i+1]);
+        
+    }
+    
+    cout << ans << "\n";
+}
+
 int main(void) {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+
+
+    solve();
+
     
 
 
-    cout << ans ;
+
     return 0;
 }
