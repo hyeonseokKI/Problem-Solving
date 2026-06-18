@@ -7,14 +7,12 @@
 using namespace std;
 
 const int MX = (1 << 12);
-int h,k,r;
-int x;
-// int t[MX * MX * MX];
+int h,k,r,x;
 queue<int> q[MX][2];
 
 const int ROOT = 0; // 0 - indexed 선언. 
-int cur_t;
 int ans;
+
 int main(void){
     cin.tie(0);
     ios::sync_with_stdio(0);
@@ -22,99 +20,51 @@ int main(void){
 
     cin >> h >> k >> r;
 
+    int leaf_st = (1 << h) - 1;
+    int leaf_en = (1 << (h+1)) - 1  ;       // [st,en)
+    // cout << leaf_st << ' ' << leaf_en << '\n';
 
-    int under_cnt = (1 << h);
-    int under_idx = (1 << h) - 1;
-    // cout <<under_cnt << '\n';
-
-    for(int i = 0 ; i < under_cnt;  i++ ) {
-        for(int j = 0; j <k; j ++){
+    for(int i = leaf_st ; i < leaf_en; i ++) {    
+        for(int j = 0; j < k; j ++){
             cin >> x;
-            q[under_idx + i][0].push(x);
-            // cout << x << ' ';
+            q[i][0].push(x);
         }
-        // cout  << under_idx + i << ' ';
-        // cout << '\n';
+        // cout << i << ' ';
     }
 
-
-    while(cur_t < r){
-        cur_t ++;
-        // if(cur_t <= r) break;
-        // cout << "cur_t : " << cur_t << '\n';
-        if(!q[ROOT][cur_t%2].empty()){
-            // cout << "처리 : " <<  q[ROOT][cur_t%2].front() << '\n';
-            ans += q[ROOT][cur_t%2].front();
-            q[ROOT][cur_t%2].pop();
-        }
-
-
-        // ROOT 를 제외한 
-        for(int i = 1; i <= h; i++ ){
-            int st_node = (1 << i) - 1;
-            int st_cnt = (1 << i);
-            // cout << st_node << ' ' << st_cnt << '\n';
-
-            vector<int> cur_h_odd_idx, cur_h_even_idx;
-            
-            for(int j = 0; j < st_cnt; j+=2 ) cur_h_odd_idx.push_back(st_node+j);
-            for(int j = 1; j < st_cnt; j+=2 ) cur_h_even_idx.push_back(st_node+j);
-
-            // for(auto c : cur_h_odd_idx) cout << c << ' ';
-            // cout << '\n';
-            // for(auto c : cur_h_even_idx) cout << c << ' ';
-            // cout << '\n';
-
-            for(auto idx : cur_h_odd_idx){
-                // 말단일때, 
-                if(i == h ){
-                    if(q[idx][0].empty()) continue;  
-                    int cur = q[idx][0].front(); q[idx][0].pop();
-                    int p_idx = (idx - 1) / 2;
-                    q[p_idx][1].push(cur);
-                    // cout << "c -> p " <<  idx << ' ' << p_idx << ' ' << cur << '\n';
-                } else{
-                    if(q[idx][cur_t%2].empty()) continue;
-                    int cur = q[idx][cur_t%2].front(); q[idx][cur_t%2].pop();
-                    int p_idx = (idx - 1) / 2;
-                    q[p_idx][1].push(cur);
-                    // cout << "c -> p " <<  idx << ' ' << p_idx << ' ' << cur << '\n';
-                }
-            }
-            for(auto idx : cur_h_even_idx){
-                // 말단일때, 
-                if(i == h ){
-                    if(q[idx][0].empty()) continue;  
-                    int cur = q[idx][0].front(); q[idx][0].pop();
-                    int p_idx = (idx - 1) / 2;
-                    q[p_idx][0].push(cur);      // 짝수 
-                    // cout << "c -> p " <<  idx << ' ' << p_idx << ' ' << cur << '\n';
-                } else{
-                    if(q[idx][cur_t%2].empty()) continue;
-                    int cur = q[idx][cur_t%2].front(); q[idx][cur_t%2].pop();
-                    int p_idx = (idx - 1) / 2;
-                    q[p_idx][0].push(cur);
-                    // cout << "c -> p " <<  idx << ' ' << p_idx << ' ' << cur << '\n';
-                }
-            }
-            
-
-            
-            // for(auto s : sel_idx){
-            //     if(q[s].empty()) continue;
-            //     int cur = q[s].front(); q[s].pop();
-            //     int p_idx = (s - 1) / 2;
-            //     q[p_idx].push(cur);
-
-            //     // cout << "c -> p " <<  s << ' ' << p_idx << ' ' << cur << '\n';
-            // }
-
-        }
-        // cout << '\n';
-
+    for(int t = 1; t <= r; t++){
         
+        int dir = t % 2;    // 홀수 1 , 짝수 0
+
+        // Top- down
+        if(!q[ROOT][dir].empty()){
+            ans += q[ROOT][dir].front(); 
+            q[ROOT][dir].pop();
+        }
+
+        for(int i = 1; i < leaf_en; i++){
+            int p_idx = (i-1) / 2;
+            int p_dir = i % 2;   // 짝수 0, 홀수 1
+            
+            if(i >= leaf_st){
+                if(q[i][0].empty()) continue;
+                
+                q[p_idx][p_dir].push(q[i][0].front());
+                q[i][0].pop();
+            } else {
+                if(q[i][dir].empty()) continue;
+
+                q[p_idx][p_dir].push(q[i][dir].front());
+                q[i][dir].pop();
+            }
+        }
+
+
+
 
     }
+    
+
 
 
     cout << ans;
