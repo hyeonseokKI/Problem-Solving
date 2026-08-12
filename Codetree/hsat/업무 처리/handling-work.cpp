@@ -34,9 +34,11 @@ int main(void){
 
     for(int i = st_node; i <= en_node; i ++){
         
-        for(int j = 0 ; j < k ; j ++){
+        for(int j = 1 ; j <= k ; j ++){
             cin >> x;
-            wq[i][0].push(x);   // 말단 노드는 0에 저장
+            wq[i][j%2].push(x);
+            
+
         }
     }
 
@@ -49,19 +51,13 @@ int main(void){
             wq[ROOT][is_odd].pop();
         }
 
-        // 1번 부터 말단 전까지 
-        for(int node_num = 1; node_num < st_node; node_num++){
+        // 1번 부터 말단까지
+        for(int node_num = 1; node_num <= en_node; node_num++){
             // cout << node_num << '\n';
             if(wq[node_num][is_odd].empty()) continue;
             wq[(node_num-1)/2][node_num%2].push(wq[node_num][is_odd].front());
             wq[node_num][is_odd].pop();
 
-        }
-        // 말단까지 업무 위로 올리기 
-        for(int node_num = st_node; node_num <= en_node; node_num++){
-            if(wq[node_num][0].empty()) continue;
-            wq[(node_num-1)/2][node_num%2].push(wq[node_num][0].front());   // 좌우 구분하여 위로 올리기
-            wq[node_num][0].pop();
         }
 
     }
