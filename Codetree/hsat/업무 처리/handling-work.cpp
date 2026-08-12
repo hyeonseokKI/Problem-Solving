@@ -1,73 +1,77 @@
 /*
     Main Logic
+
+        1. R일 동안 업무가 위로 올라간다.
+        2. 홀수번째 날짜는 왼쪽 부하 업무가 올라가고, 짝수번째 오른쪽 부하 업부
+        3. 업무를 올리는 건 그 다음날 처리 가능하다. 
+
+
+        wq[노드번호][왼,오] : 왼쪽 1 오른쪽 0 
         
 */
 
 #include<bits/stdc++.h>
 using namespace std;
 
-const int MX = (1 << 12);
-int h,k,r,x;
-queue<int> q[MX][2];
+const int ROOT = 0;
+const int MX = (1 << 11) + 20;
 
-const int ROOT = 0; // 0 - indexed 선언. 
+int h,k,r;
+int x;
+
+queue<int> wq[MX][2];
 int ans;
 
 int main(void){
     cin.tie(0);
     ios::sync_with_stdio(0);
-    
 
+    
     cin >> h >> k >> r;
 
-    int leaf_st = (1 << h) - 1;
-    int leaf_en = (1 << (h+1)) - 1  ;       // [st,en)
-    // cout << leaf_st << ' ' << leaf_en << '\n';
+    int st_node = (1 << h) -1;
+    int en_node = st_node * 2;
 
-    for(int i = leaf_st ; i < leaf_en; i ++) {    
-        for(int j = 0; j < k; j ++){
-            cin >> x;
-            q[i][0].push(x);
-        }
-        // cout << i << ' ';
-    }
-
-    for(int t = 1; t <= r; t++){
+    for(int i = st_node; i <= en_node; i ++){
         
-        int dir = t % 2;    // 홀수 1 , 짝수 0
+        for(int j = 0 ; j < k ; j ++){
+            cin >> x;
+            wq[i][0].push(x);   // 말단 노드는 0에 저장
+        }
+    }
 
-        // Top- down
-        if(!q[ROOT][dir].empty()){
-            ans += q[ROOT][dir].front(); 
-            q[ROOT][dir].pop();
+    for(int day = 1; day <= r; day++){
+
+        int is_odd = ((day % 2)) ;  // 홀수 = 왼쪽
+        // 부서장 처리
+        if(!wq[ROOT][is_odd].empty()) {
+            ans += wq[ROOT][is_odd].front();
+            wq[ROOT][is_odd].pop();
         }
 
-        for(int i = 1; i < leaf_en; i++){
-            int p_idx = (i-1) / 2;
-            int p_dir = i % 2;   // 짝수 0, 홀수 1
-            
-            if(i >= leaf_st){
-                if(q[i][0].empty()) continue;
-                
-                q[p_idx][p_dir].push(q[i][0].front());
-                q[i][0].pop();
-            } else {
-                if(q[i][dir].empty()) continue;
+        // 1번 부터 말단 전까지 
+        for(int node_num = 1; node_num < st_node; node_num++){
+            // cout << node_num << '\n';
+            if(wq[node_num][is_odd].empty()) continue;
+            wq[(node_num-1)/2][node_num%2].push(wq[node_num][is_odd].front());
+            wq[node_num][is_odd].pop();
 
-                q[p_idx][p_dir].push(q[i][dir].front());
-                q[i][dir].pop();
-            }
         }
-
-
-
+        // 말단까지 업무 위로 올리기 
+        for(int node_num = st_node; node_num <= en_node; node_num++){
+            if(wq[node_num][0].empty()) continue;
+            wq[(node_num-1)/2][node_num%2].push(wq[node_num][0].front());   // 좌우 구분하여 위로 올리기
+            wq[node_num][0].pop();
+        }
 
     }
-    
-
 
 
     cout << ans;
 
+    // cout << st_node << '\n';
+    // cout << en_node << '\n';
+    // cout << MX << '\n';
 
+    
 }
