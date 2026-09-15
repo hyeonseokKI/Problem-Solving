@@ -13,7 +13,8 @@ const int MX = 50 + 2;
 
 int n,l,r;
 int board[MX][MX];
-bool vis[MX][MX];
+// bool vis[MX][MX];
+int dist[MX][MX];
 
 int dx[4] = {1,0,-1,0};
 int dy[4] = {0,1,0,-1};
@@ -39,19 +40,17 @@ int main(void){
 
     while(true){
         is_moved = false;
-        for(int i = 0 ; i < n; i ++) fill(vis[i],vis[i]+n,0);
-        
+        for(int i = 0 ; i < n; i ++) fill(dist[i],dist[i]+n,-1);
+        int idx = 0;
+        vector<pair<int,int>> g_idx[MX*MX];
         for(int i = 0 ; i < n ; i++){
             for(int j = 0 ; j < n ; j++){
                 queue<pair<int,int>> q;
-                vector<pair<int,int>> cand;
-                int sum = 0;
-                if(vis[i][j]) continue;
-                
+
+                if(dist[i][j] != -1) continue;
                 q.push({i,j});
-                vis[i][j]=1;
-                sum += board[i][j];
-                cand.push_back({i,j});
+                g_idx[idx].push_back({i,j});
+                dist[i][j]=idx++;
 
                 while(!q.empty()){
                     auto cur = q.front(); q.pop();
@@ -59,31 +58,48 @@ int main(void){
                         int nx = cur.X + dx[dir];
                         int ny = cur.Y + dy[dir];
                         if(nx < 0 || ny < 0 || nx >= n || ny >= n )continue;
-                        if(vis[nx][ny]) continue;
+                        if(dist[nx][ny] != -1) continue;
                         int diff = abs(board[cur.X][cur.Y] - board[nx][ny]);
                         if(diff < l || diff > r) continue;
                         q.push({nx,ny});
-                        vis[nx][ny] = 1;
-                        sum += board[nx][ny];
-                        cand.push_back({nx,ny});
+                        dist[nx][ny] = dist[cur.X][cur.Y];
+                        g_idx[dist[cur.X][cur.Y]].push_back({nx,ny});
+
                     }
                     
                 }
 
-                int tot = sum / (int)cand.size();
-                for(auto& c : cand){
-                    board[c.X][c.Y] = tot;                 
-                }
-                if(cand.size() > 1)  is_moved =true;
             }
         }
 
+        for(int i = 0 ; i < idx; i++){
+            if(g_idx[i].size() <= 1) continue;
+
+            int tot = 0;
+            for(auto& cur : g_idx[i]){
+                tot += board[cur.X][cur.Y];
+            }
+            tot /= g_idx[i].size();
+            for(auto& cur : g_idx[i]){
+                board[cur.X][cur.Y] = tot;
+            }
+
+            is_moved = true;
+
+
+        }
 
         // print_board(board);
 
         if(!is_moved) break;
         ans++;
+    
+
     }
+
+
+
+
     
 
 
