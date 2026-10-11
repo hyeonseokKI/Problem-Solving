@@ -1,149 +1,147 @@
 /*
     Main Logic
+        모서리 6개 테두리 12개 각각 조사 
         
-        step 1 : 모든 경우의 수는 2 ^ 6  = 64;
+        타입 0 : 흑으로 시작  , 1  : 백으로 시작 
+        n 은 홀수
+        x,y,z 왼쪽 아래 꼭지점 기준 
+
+        ww,bb 찾기 
+        step 1 :  모서리 
+            각 꼭지점은 x,y,z 으로 8개의 모서리에서 세 개의 평면의 첫번째 색의 갯수 (BB) 2개 이상 이면 +1
             
-        step 2 : 꼭지점 과 선 (꼭지점 제외한 가운데만)  계산
-            n이 짝수,홀수에 따라 꼭지점 색상 달라짐. 
-
-            꼭지점 8 개 조사
-            선 12개 조사
+        step 2 : 테두리
+            12개의 테두리 에서 2개의 평면 만나는 테두리 선택해서, 같은 타입인지 확인
+                같은 타입이면서, 흑으로 시작하면, b w b w b  이므로, w b w 중 1개이다. == (n-3) / 2
+                같은 타입이면서, 백으로 시작하면, w b w b w  이므로, b w b 중 2개이다. == (n-1) / 2
 
         
         
 
+        wb 는 격자식으로 모두를 펼치면 모든 쌍을 만들 수 있다. 
+        따라서 전체 격자 수는 n * n * 6(면)
+        2개가 한 쌍이므로 /2
+        = n * n * 3
 */
 
 #include<bits/stdc++.h>
 using namespace std;
 
-const int TOT = 64;
+const int CMX = 64;
 
 int n;
-int n_side;
-long long mx_bb,mx_wb;
+
+
+long long cnt_bb,cnt_wb;    // n = 99'999 일때 오버플로우 
 
 
 int main(void){
     cin.tie(0);
     ios::sync_with_stdio(0);
     
-
     cin >> n;
 
-    // 테두리 선 가운데 길이
-    n_side = n - 2;
-    // cout << n_side << '\n';
 
-    // 0 : 위 , 1 : 아래, 
-    // 2 : 앞,  3 : 뒤 
-    // 4, 왼쪽, 5: 오른쪽
-    for(int i = 0 ; i < TOT; i ++){
+    for(int i = 0 ; i < CMX; i++){
 
-        // 0 : 최좌측 흑, 
-        // 1 : 최좌측 백
-        int states[6] = {};
+        // 0 : 흑 , 1 : 백 
+        int states[6] = {} ;
         int brute = i;
-        for(int idx = 0 ; idx < 6 ; idx++){
-            states[idx] = brute% 2;  
-            brute/= 2;
+        for(int j = 0; j < 6; j ++){
+            states[j] = brute % 2 ;
+            brute/=2;
         }
 
-        // 꼭지점 
-        long long cur_bb = 0;
+        // 모서리 
+        int ens[2] = {0, n-1};
+        long long cnt_tmp_bb = 0;
+        for(int x : ens){
+            for(int y : ens){
+                for(int z : ens){
+                    int s_x = (x == 0 ? 0 : 1); // 앞 뒤
+                    int s_y = (y == 0 ? 2 : 3); // 왼 오
+                    int s_z = (z == 0 ? 4 : 5); // 아 위
 
-        int ends[2] = {0,n-1};
-        for(int x : ends){
-            for(int y : ends){
-                for(int z : ends){
-                    int f_x,f_y,f_z;
-                    int c_x,c_y,c_z;
-                    f_x = (x == 0) ? 0 : 1; // 위 아래
-                    f_y = (y == 0) ? 2 : 3; // 앞 뒤 
-                    f_z = (z == 0) ? 4 : 5; // 왼 오른
-
-                    c_x = (states[f_x] + y + z) % 2;
-                    c_y = (states[f_y] + x + z) % 2;
-                    c_z = (states[f_z] + x + y) % 2;
-                    
-                    int cnt = c_x + c_y + c_z;
-                    if(cnt >= 2) cur_bb++;
+                    int c_x = (states[s_x] + y + z) % 2;
+                    int c_y = (states[s_y] + x + z) % 2;
+                    int c_z = (states[s_z] + x + y) % 2;
+                    int cnt_tmp = c_x + c_y + c_z;
+                    if(cnt_tmp <= 1) cnt_tmp_bb++;
                 }
             }
         }
+        // for(int s : states) cout << s ;
+        // cout <<'\n';
 
         // 테두리 
+        for(int x : ens){
+            for(int y : ens){
+                int s_x = (x == 0 ? 0 : 1); // 앞 뒤
+                int s_y = (y == 0 ? 2 : 3); // 왼 오
 
-        for(int x : ends){
-            for(int y : ends){
-                int f_x = (x == 0) ? 0 : 1;
-                int f_y = (y == 0) ? 2 : 3;
-                
-                int p_x = (states[f_x] + y) % 2;
-                int p_y = (states[f_y] + x) % 2;
-                
-                if(p_x == p_y){
-                    cur_bb += ((n-2)/2);
-                    if(n% 2 !=0 && p_x == 0){
-                        cur_bb++;
+                int p_x = (states[s_x] + y) % 2;
+                int p_y = (states[s_y] + x) % 2;
+                if(p_x == p_y) {
+                    // if(p_x == 0 && )        
+                    // w b w || w b w b w || w b w b w b w 
+                    // b w b || b w b w b || b w b w b w b 
+                    if(p_x == 0){    // b로 시작한다면 
+                        cnt_tmp_bb += (n-3) / 2;
+                    } else{
+                        cnt_tmp_bb += (n-2 + 1) / 2;
+                        
                     }
-                    // if(n % 2 == 0)  cur_bb += ((n-2)/2);
-                    // else{
-                    //     cur_bb += ((n-2)/2);
-                    //     if(p_x == 0){ // 흑이면
-                    //         cur_bb ++;
-                    //     }    
-                    // }
+                    // cnt_tmp_bb += (n-2) / 2;
+                    // cout << n-2 << ' ';
                 }
-
             }
         }
 
-        for(int x : ends){
-            for(int z : ends){
-                int f_x = (x == 0) ? 0 : 1;
-                int f_z = (z == 0) ? 4 : 5;
-                
-                int p_x = (states[f_x] + z) % 2;
-                int p_z = (states[f_z] + x) % 2;
+        for(int y : ens){
+            for(int z : ens){
+                int s_y = (y == 0 ? 2 : 3); // 왼 오
+                int s_z = (z == 0 ? 4 : 5); // 아 위
 
-                if(p_x == p_z){
-                    cur_bb += ((n-2)/2);
-                    if(n% 2 !=0 && p_x == 0){
-                        cur_bb++;
+                int p_y = (states[s_y] + z) % 2;
+                int p_z = (states[s_z] + y) % 2;
+                if(p_y == p_z) {
+                    if(p_y == 0){    // b로 시작한다면 
+                        cnt_tmp_bb += (n-3) / 2;
+                    } else{
+                        cnt_tmp_bb += (n-2 + 1) / 2;
+                        
                     }
                 }
             }
         }
-        for(int y : ends){
-            for(int z : ends){
-                int f_y = (y == 0) ? 2 : 3;
-                int f_z = (z == 0) ? 4 : 5;
 
-                int p_y = (states[f_y] + z) % 2;
-                int p_z = (states[f_z] + y) % 2;
+        for(int x : ens){
+            for(int z : ens){
+                int s_x = (x == 0 ? 0 : 1); // 앞 뒤
+                int s_z = (z == 0 ? 4 : 5); // 아 위
 
-                if(p_y == p_z){
-                    cur_bb += ((n-2)/2);
-                    if(n% 2 !=0 && p_y == 0){
-                        cur_bb++;
+
+                int p_x = (states[s_x] + z) % 2;
+                int p_z = (states[s_z] + x) % 2;
+                if(p_x == p_z) {
+                    if(p_x == 0){    // b로 시작한다면 
+                        cnt_tmp_bb += (n-3) / 2;
+                    } else{
+                        cnt_tmp_bb += (n-2 + 1) / 2;
+                        
                     }
                 }
             }
         }
-        
 
-        mx_bb = max(mx_bb, cur_bb);
+
+        // cout << '\n';
+
+
+        cnt_bb = max(cnt_bb, cnt_tmp_bb);
     }
 
 
-
-    // wb 는 6 * n^2  / 2  전체가 체스판 처럼 되면 가능 
-    mx_wb = 1LL * n * n * 6 / 2 ;
-
-    cout << mx_bb << ' ' << mx_bb << ' ' << mx_wb << '\n';
-
-    
-
-
+    cnt_wb = 1LL * 3 * n * n;
+    cout << cnt_bb << ' ' <<cnt_bb << ' ' << cnt_wb ;
 }
