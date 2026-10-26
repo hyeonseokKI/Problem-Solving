@@ -6,7 +6,16 @@
             -> 길이가 x 일때, k 를 이상인지 아닌지.
         step 1. 길이 최소값과 최댓값 설정.
 
-        step 2 . 
+        step 2 . mid : 보수 패치의 길이이다.
+            cnt 갯수에 따라, k 보다 작을 경우, 최소 길이 후보.
+            k 보다 클 경우, 최소 길이 후보가 되지 않고, 패치의 길이를 늘린다. 
+
+        step 3. st <= en 와 st < en 일때 차이를 알아야된다.
+            바킹독에서는 st < en 이고 st 가 답으로 이용되므로, 
+            st = mid 가 되고, mid = (st+en+1)/2 이다.
+
+
+        ver 바킹독 
 */
 
 #include<bits/stdc++.h>
@@ -30,7 +39,7 @@ int main(void){
     int st = 1;
     int en = arr[n-1] - arr[0] + 1;
 
-    while(st <= en){
+    while(st < en){
         int cnt = 0 ;
         int mid = (st + en) / 2;    // 보수 패치의 길이 ex) 1,4 일떄, 길이 2임.
         
@@ -47,11 +56,11 @@ int main(void){
 
         // cnt 가 k개를 넘는 순간 종료
         if(cnt <= k){
-            ans = mid;  // 최솟값으로 갱신됨.
-            en = mid - 1;
+            // ans = mid;  // 최솟값으로 갱신됨.
+            en = mid;
         } else{
             st = mid + 1;
         }
     }
-    cout << ans;
+    cout << en;
 }
