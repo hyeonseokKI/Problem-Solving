@@ -11,11 +11,10 @@ using namespace std;
 
 int n;
 string s;
-stack<char> st;
+stack<int> in_st,qu_st;
 
 bool isvalid = true;
 string ans = "No";
-int in_mx, in_mn;
 
 int main(void){
     cin.tie(0);
@@ -24,38 +23,30 @@ int main(void){
     cin >> n;
     cin >> s;
 
-    // test
-    // cout << n << ' ' << s << '\n';
-
-    if(s.size() % 2 == 1) isvalid = false;
-
-    for(int i = 0 ; i < s.size(); i ++){
-        if(!isvalid)  break;
-        
-        if(s[i] == '(') {
-            in_mx ++;
-            in_mn ++;
+    if(s.size() % 2 != 0 ) isvalid = false;
+    for(int i = 0 ; i < n ; i ++){
+        if(!isvalid) break;
+        if(s[i] == '('){
+            in_st.push(i);
         } else if(s[i] == ')'){
-            in_mx --;
-            in_mn --;
-            if(in_mn < 0) in_mn+=2;
+            if(!in_st.empty()) in_st.pop();
+            else if(!qu_st.empty()) qu_st.pop();
+            else isvalid = false;
         } else if(s[i] == '?'){
-            in_mx ++;
-            if(in_mn > 0)in_mn --;
-            else in_mn++;
+            qu_st.push(i);
         }
 
-        // if(in)
-        // cout << in_mx << ' ' << in_mn << '\n';
-
-        if(in_mx < 0 ) isvalid =false;
-
     }
+    while(!in_st.empty() && !qu_st.empty()){
+            if(in_st.top() > qu_st.top()) {
+                isvalid = false;
+                break;
+            }
+            in_st.pop();
+            qu_st.pop();
+        }
 
-    // in_mn >= 0 
-    if(in_mn != 0 ) isvalid = false;
-
-
+    if(!in_st.empty()) isvalid = false;
     if(isvalid) ans = "Yes";
 
     cout << ans;
