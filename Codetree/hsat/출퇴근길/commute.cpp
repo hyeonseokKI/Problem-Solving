@@ -1,5 +1,11 @@
 /*
     Main Logic
+
+        step 1. s - > x -> t 에서 x 찾기
+        step 2. s -> x 일때, x == t 일때는  목적지 정점을 방문시 이동x 조건 
+        step 3. x -> t 일때, 역방향 그래프 이용해서 t -> x 찾기. x == s 여도 이동o
+
+        
         
 */
 
@@ -17,6 +23,45 @@ bool chk[MX],chk2[MX];
 bool gchk[MX],gchk2[MX];
 int ans;
 
+void solve(int st, int en, bool solchk[MX]){
+    bool chk[MX],chk2[MX];
+    fill(chk,chk+n+1,0);
+    fill(chk2,chk2+n+1,0);
+
+    //st -> x 
+    chk[st] = 1;
+    chk[en] = 1;
+    q.push(st);
+    while(!q.empty()){
+        int cur = q.front(); q.pop();
+        for(int nxt : adj[cur]){
+            if(chk[nxt]) continue;
+            chk[nxt] = 1;
+            q.push(nxt);
+        }
+    }
+
+    // x -> en == en -> x       st 거쳐도 됨.
+    chk2[en] = 1;
+    q.push(en);
+    while(!q.empty()){
+        int cur = q.front();q.pop();
+        for(int nxt : rev_adj[cur]){
+            if(chk2[nxt]) continue;
+            chk2[nxt] = 1;
+            q.push(nxt);
+        }
+    }
+
+    for(int i = 1; i <=n; i++){
+       if(chk[i] && chk2[i]) solchk[i] = 1;
+    }
+
+}
+
+
+
+
 int main(void){
     cin.tie(0);
     ios::sync_with_stdio(0);
@@ -30,74 +75,8 @@ int main(void){
     }
     cin >> s >> t;
     
-
-    // s - > x;
-    chk[s] = 1;
-    chk[t] = 1;     //미리 방문 표시하여 방문 못하게 
-    q.push(s);
-    while(!q.empty()){
-        int cur = q.front(); q.pop();
-        for(int nxt : adj[cur]){
-            if(chk[nxt]) continue;
-            chk[nxt] = 1;
-            q.push(nxt);
-        }
-    }
-
-    // x -> t == t -> x';
-    chk2[t] = 1;
-    // chk2[s] = 1;
-    q.push(t);
-    while(!q.empty()){
-        int cur = q.front();q.pop();
-        for(int nxt : rev_adj[cur]){
-            if(chk2[nxt]) continue;
-            chk2[nxt] = 1;
-            q.push(nxt);
-        }
-    }
-
-
-    // s  -> x -> t 확인
-    for(int i = 1; i <=n; i++){
-       if(chk[i] && chk2[i]) gchk[i] = 1;
-    }
-
-    fill(chk,chk+n+1,0);
-    fill(chk2,chk2+n+1,0);
-
-    // t - > x 
-    chk[t] = 1;
-    chk[s] = 1;
-    q.push(t);
-    while(!q.empty()){
-        int cur = q.front(); q.pop();
-        for(int nxt : adj[cur]){
-            if(chk[nxt]) continue;
-            chk[nxt] = 1;
-            q.push(nxt);
-        }
-    }
-
-     // x -> s == s <- x 
-    chk2[s] = 1;
-    // chk2[t] = 1;
-    q.push(s);
-    while(!q.empty()){
-        int cur = q.front();q.pop();
-        for(int nxt : rev_adj[cur]){
-            if(chk2[nxt]) continue;
-            chk2[nxt] = 1;
-            q.push(nxt);
-        }
-    }
-
-
-     // t  -> x -> s 확인
-    for(int i = 1; i <=n; i++){
-       if(chk[i] && chk2[i]) gchk2[i] = 1;
-    }
-
+    solve(s,t,gchk);
+    solve(t,s,gchk2);
 
     // s->t, t->s 공통 확인 
     for(int i = 1 ; i <=n; i++){
